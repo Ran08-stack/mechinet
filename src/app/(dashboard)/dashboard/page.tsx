@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Plus, ArrowLeft } from "lucide-react";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -19,7 +22,7 @@ export default async function DashboardPage() {
     .from("users")
     .select("mechina_id")
     .eq("id", user!.id)
-    .single();
+    .maybeSingle();
 
   let candidatesCount = 0;
   let formsCount = 0;
@@ -43,17 +46,18 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">דשבורד</h1>
-        <p className="text-muted-foreground mt-1">
-          ברוך הבא ל-Mechinet
-        </p>
+        <p className="text-muted-foreground mt-1">ברוך הבא ל-Mechinet</p>
       </div>
 
       {!profile?.mechina_id && (
-        <Card>
+        <Card className="border-amber-200 bg-amber-50">
           <CardHeader>
-            <CardTitle>החשבון שלך עדיין לא משויך למכינה</CardTitle>
-            <CardDescription>
-              בקרוב נוסיף תהליך להגדרת המכינה. בינתיים — צור קשר עם מנהל המערכת.
+            <CardTitle className="text-amber-900">
+              החשבון שלך עדיין לא משויך למכינה
+            </CardTitle>
+            <CardDescription className="text-amber-800">
+              ייתכן שזו בעיית הרשאות זמנית. נסה לרענן את הדף, או צור קשר עם מנהל
+              המערכת.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -72,11 +76,11 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardDescription>טפסים פעילים</CardDescription>
+            <CardDescription>טפסים</CardDescription>
             <CardTitle className="text-3xl">{formsCount}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">טפסים שיצרת</p>
+            <p className="text-xs text-muted-foreground">סה״כ במכינה</p>
           </CardContent>
         </Card>
 
@@ -86,47 +90,68 @@ export default async function DashboardPage() {
             <CardTitle className="text-lg text-emerald-600">פעיל</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">
-              שלב 1 — Auth מושלם
-            </p>
+            <p className="text-xs text-muted-foreground">המערכת זמינה</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>הצעדים הבאים</CardTitle>
-          <CardDescription>
-            המערכת תהיה מוכנה לשימוש מלא בעוד כמה שלבים
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-emerald-600">✓</span>
-            <span>הקמת תשתית (Next.js + Supabase)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-emerald-600">✓</span>
-            <span>מערכת התחברות והרשמה</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <span>○</span>
-            <span>בונה טפסים</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <span>○</span>
-            <span>קבלת מועמדים מטופס ציבורי</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <span>○</span>
-            <span>Pipeline שלבי קבלה</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <span>○</span>
-            <span>סיכום AI לכל מועמד</span>
-          </div>
-        </CardContent>
-      </Card>
+      {profile?.mechina_id && (
+        <Card>
+          <CardHeader>
+            <CardTitle>איך מתחילים</CardTitle>
+            <CardDescription>שלוש פעולות פשוטות כדי להתחיל</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-start gap-3 rounded-lg border p-4">
+              <div className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium">
+                1
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">צור טופס מועמדות</div>
+                <div className="text-sm text-muted-foreground">
+                  בנה טופס בעברית עם השדות שאתם צריכים
+                </div>
+              </div>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/forms/new">
+                  <Plus className="ml-1 h-3 w-3" />
+                  צור
+                </Link>
+              </Button>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-lg border p-4">
+              <div className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium">
+                2
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">פרסם וקבל קישור</div>
+                <div className="text-sm text-muted-foreground">
+                  שתף את הקישור הציבורי עם מועמדים בוואטסאפ או מייל
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-lg border p-4">
+              <div className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium">
+                3
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">נהל מועמדים בדשבורד</div>
+                <div className="text-sm text-muted-foreground">
+                  עקוב אחר התקדמות, הוסף הערות, ועדכן סטטוסים
+                </div>
+              </div>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/forms">
+                  לטפסים
+                  <ArrowLeft className="mr-1 h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

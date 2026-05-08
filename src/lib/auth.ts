@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * דורש משתמש מחובר. אם לא — מפנה ללוגין.
  * מחזיר את ה-user וה-profile (כולל mechina_id).
+ *
+ * הערה: אם RLS חוסם או profile חסר — זה לא יזרוק ל-login,
+ * כי המשתמש Auth קיים. במקום זה נחזיר profile=null.
  */
 export async function requireUser() {
   const supabase = await createClient();
@@ -19,22 +22,19 @@ export async function requireUser() {
     .from("users")
     .select("*, mechinot(id, name, slug)")
     .eq("id", user.id)
-    .single();
-
-  if (!profile) {
-    redirect("/login");
-  }
+    .maybeSingle();
 
   return { user, profile, supabase };
 }
 
 /**
  * דורש משתמש מחובר ושמשויך למכינה.
+ * אם אין profile או אין mechina_id — מפנה לדשבורד עם הודעה.
  */
 export async function requireUserWithMechina() {
   const { user, profile, supabase } = await requireUser();
 
-  if (!profile.mechina_id) {
+  if (!profile || !profile.mechina_id) {
     redirect("/dashboard");
   }
 

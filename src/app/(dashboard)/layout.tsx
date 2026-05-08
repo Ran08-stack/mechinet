@@ -20,11 +20,12 @@ export default async function DashboardLayout({
   }
 
   // טוען נתוני משתמש מורחבים מהטבלה הציבורית
+  // maybeSingle כדי לא לקרוס אם RLS מחזיר 0 rows
   const { data: profile } = await supabase
     .from("users")
     .select("*, mechinot(name, slug)")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   return (
     <div className="min-h-screen bg-zinc-50">
