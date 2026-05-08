@@ -38,9 +38,34 @@ export async function signUp(formData: FormData) {
   }
 
   // אם Supabase דורש אישור אימייל — לא תהיה session
-  // במקרה כזה נחזיר הודעה למשתמש במקום לשלוח לדשבורד
   if (!data.session) {
     redirect("/login?confirm=1");
+  }
+
+  // שיוך אוטומטי למכינה הראשונה (בשלב הפיילוט יש רק אחת — רעות)
+  // התנהגות זו תוחלף בעתיד ב"בחירת מכינה" או "יצירת מכינה חדשה"
+  if (data.user) {
+    const { data: firstMechina } = await supabase
+      .from("mechinot")
+      .select("id")
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .single();
+
+    if (firstMechina) {
+      // משתמש ראשון במכינה הופך ל-admin, השאר staff
+      const { count } = await supabase
+        .from("users")
+        .select("*", { count: "exact", head: true })
+        .eq("mechina_id", firstMechina.id);
+
+      const role = (count ?? 0) === 0 ? "admin" : "staff";
+
+      await supabase
+        .from("users")
+        .update({ mechina_id: firstMechina.id, role })
+        .eq("id", data.user.id);
+    }
   }
 
   revalidatePath("/", "layout");
